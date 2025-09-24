@@ -1,0 +1,111 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historia de Colo Colo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background-color: #000;
+            color: #fff;
+            text-align: center;
+            padding: 2em;
+        }
+        section {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #000;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px 0;
+        }
+        footer {
+            text-align: center;
+            padding: 1em;
+            background-color: #000;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Historia de Colo Colo</h1>
+    </header>
+
+    <section id="fundacion">
+        <h2>Fundación y Primeros Años</h2>
+        <p>Colo Colo fue fundado el 19 de abril de 1925 por un grupo de exjugadores del Magallanes, liderados por David Arellano. El club se creó con el objetivo de representar la identidad chilena y rápidamente se convirtió en un símbolo del fútbol nacional.</p>
+        <img src="images/historia1.jpg" alt="Fundación de Colo Colo">
+    </section>
+
+    <section id="era-dorada">
+        <h2>La Era Dorada</h2>
+        <p>Durante las décadas de 1980 y 1990, Colo Colo vivió momentos de gloria, destacando la obtención de la Copa Libertadores en 1991, siendo el primer equipo chileno en lograrlo. Este periodo marcó un hito en la historia del club.</p>
+        <img src="images/historia2.jpg" alt="Copa Libertadores 1991">
+    </section>
+
+    <section id="presente">
+        <h2>Colo Colo en la Actualidad</h2>
+        <p>Hoy en día, Colo Colo sigue siendo el club más popular de Chile, con una hinchada fiel y numerosos títulos nacionales. Continúa compitiendo en torneos locales e internacionales, manteniendo su legado como el "Eterno Campeón".</p>
+        <img src="images/historia3.jpg" alt="Colo Colo Actualidad">
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Historia de Colo Colo. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>
